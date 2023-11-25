@@ -1,0 +1,472 @@
+---
+API: 3
+OpenSesame: 4.0.1
+Platform: posix
+---
+set width 1024
+set title "Новый эксперимент"
+set subject_parity even
+set subject_nr 0
+set start experiment
+set sound_sample_size -16
+set sound_freq 48000
+set sound_channels 2
+set sound_buf_size 1024
+set round_decimals 2
+set height 768
+set fullscreen no
+set form_clicks no
+set foreground white
+set font_underline no
+set font_size 18
+set font_italic no
+set font_family mono
+set font_bold no
+set experiment_path "/Users/larisa/Downloads"
+set disable_garbage_collection yes
+set description "The main experiment item"
+set canvas_backend psycho
+set background "#3d3846"
+
+define sequence experiment
+	set flush_keyboard yes
+	set description "Запускает несколько элементов в последовательности"
+	run getting_started True
+	run new_1_inline_script True
+	run welcome True
+	run new_loop True
+
+define notepad getting_started
+	__note__
+	Welcome to OpenSesame 4.0 "Melodramatic Milgram"!
+	If you are new to OpenSesame, it is a good idea to follow one of the tutorials,
+	which can be found on the documentation site:
+	- <http://osdoc.cogsci.nl/>
+	You can also check out the examples. These can be opened via:
+	- Menu -> Tools -> Example experiments.
+	And feel free to ask for help on the forum:
+	- <http://forum.cogsci.nl/>
+	Have fun with OpenSesame!
+	__end__
+	set description "A simple notepad to document your experiment. This plug-in does nothing."
+
+define inline_script new_1_inline_script
+	set description "Выполняет код Python"
+	___run__
+	
+	# для дальнейшего описания смотрите new_inline_script в new_loop
+	import random
+	i=0 # Счетчик циклов выполнения данного скрипта, чтобы оценивать на каком шаге он находится
+	
+	x=random.randint(0,4) #случайная величина - индекс объекта, выбираемого из одного из списков PERSONLIST
+	y=random.randint(0,8) #случайная величина - индекс объекта, выбираемого из списка TRAITLIST
+	c=[0,1,2,3]             #порядковые номера самих списков PERSONLIST
+	d=random.choice(c)        #случайное определение порядкового номера списка PERSONLIST, из которого будет выбираться слово
+	personlist_acquaintance = ['acquaint1','acquaint2', 'acquaint3', 'acquaint4','acquaint5'] 
+	personlist_self = ['self', 'self', 'self', 'self','self']
+	personlist_close = ['close1', 'close2','close3', 'close4', 'close5']
+	personlist_other = ['Jimmy', 'Catlin', 'Mark', 'Johnson','Riddick']
+	traitlist = ['gregarious','outgoing','miserable','cannot code','fancy','winner','chad','belittled','thoughtful']
+	person_choice = []  #пустая переменная, в которую будет предварительно заноситься результат случайного выбора слова из соответствующего списка PERSONLIST, определенного в свою очередь в результате случайного выбора одного из этих списков
+	var.person='empty' #присвоение экспериментальным (VAR) переменным PERSON и TRAIT (вывода программы) значения EMPTY -- технически пустое, не относящееся на данном этапе к выводу
+	var.trait='empty'
+	if i in range(0,4):        #Основное тело программы, представленное IF-условием. Считывание значения i для оценивания того, сколько раз выполнился скрипт, или (что то же самое) сколько списков PERSONLIST уже было выбрано и исключено из доступного выбора к данной итерации (в итоге по одному слову показывается на каждое выполнение, но не более пяти выполнений (что адекватно количеству списков или групп), после чего VAR переменные принимают значение 0 и все что следует до данного условия IF выполняется еще раз == программа начинает работать заново)
+	    if i==0 and len(c)==4:    #второй уровень при выполнении предыдущего, представленный также условием IF, проверяет что скрипт выполняется первый раз (i=0) и что никаких списков PERSONLIST не выбиралось (переменная "c" сохраняет все значения от 0 до 3). При i от 1 до 4 -- это количество исключенных списков и тех, что остаются доступными к выбору == len(c), длинна переменной "с"
+	        var.person ='empty'
+	        var.trait='empty'
+	        if d==0:        #Третий уровень условий IF -- проверяем, какое значение приняла переменная "d", чтобы определить список, из которого будет выбираться слово. В данном случае значение 0 соответствует списку PERSONLIST SELF
+	            if var.person =='empty' and var.trait =='empty':
+	                person_choice.append(personlist_self.pop(x)) # В предварительную переменную PERSON CHOICE добавляется значение случайно выбранной переменной из данного списка, и оно же исключается из исходного списка PERSONLIST SELF
+	                var.person=person_choice[0] #выбранное значение присваивается экспериментальной VAR-переменной Person, которое находится в предварительной переменной PERSON CHOICE под индексом 0
+	                person_choice.clear() #предварительная переменная PERSON CHOICE очищается
+	                x=random.randint(0,3) #значение индекса по которому выбираются слова из списков вновь рандомизируется
+	                trait = traitlist.pop(y) #по случайному индексу Y выбирается прилагательное из списка TRAITLIST и присваивается предварительной переменной trait, после чего удаляется из исходного списка TRAITLIST
+	                var.trait=trait #выбранное значение присваивается экспериментальной переменной Trait
+	                y=random.randint(0,7) #значение индекса Y по которому выбираются прилагательные вновь рандомизируется
+	                if len(traitlist)==1:
+	                    traitlist = ['gregarious','outgoing','miserable','cannot code','fancy','winner','chad','belittled','thoughtful']  # проверяет что лист TRAITLIST не закончился, не обязательное условие
+	                c.remove(0) #из списка "с" порядковых номеров удаляется индекс, соответствующий списку PERSONLIST SELF, чтобы тот не был выбран снова в оставшихся итерациях i
+	        if d==1:
+	            if var.person =='empty' and var.trait =='empty':
+	                person_choice.append(personlist_acquaintance.pop(x))
+	                var.person=person_choice[0]
+	                person_choice.clear()
+	                x=random.randint(0,3)
+	                trait = traitlist.pop(y)
+	                var.trait=trait
+	                y=random.randint(0,7)
+	                if len(traitlist)==1:
+	                    traitlist = ['gregarious','outgoing','miserable','cannot code','fancy','winner','chad','belittled','thoughtful']
+	                c.remove(1)
+	        if d==2:
+	            if var.person =='empty' and var.trait =='empty':
+	                person_choice.append(personlist_close.pop(x))
+	                var.person=person_choice[0]
+	                person_choice.clear()
+	                x=random.randint(0,3)
+	                trait = traitlist.pop(y)
+	                var.trait=trait
+	                y=random.randint(0,7)
+	                if len(traitlist)==1:
+	                    traitlist = ['gregarious','outgoing','miserable','cannot code','fancy','winner','chad','belittled','thoughtful']
+	                c.remove(2)
+	        if d==3:
+	            if var.person =='empty' and var.trait =='empty':
+	                person_choice.append(personlist_other.pop(x))
+	                var.person=person_choice[0]
+	                person_choice.clear()
+	                x=random.randint(0,3)
+	                trait = traitlist.pop(y)
+	                var.trait=trait
+	                y=random.randint(0,7)
+	                if len(traitlist)==1:
+	                    traitlist = ['gregarious','outgoing','miserable','cannot code','fancy','winner','chad','belittled','thoughtful']
+	                c.remove(3)
+	    
+	    
+	i=i+1
+	
+	# для дальнейшего описания смотрите new_inline_script в new_loop
+	__end__
+	set _prepare ""
+
+define sketchpad new_1_sketchpad
+	set duration keypress
+	set description "Отображает стимулы"
+	draw line color=white penwidth=9 show_if=True x1=0 x2=0 y1=-32 y2=32 z_index=0
+	draw line color=white penwidth=9 show_if=True x1=-32 x2=32 y1=0 y2=0 z_index=0
+
+define inline_script new_inline_script
+	set description "Выполняет код Python"
+	___run__
+	import random
+	
+	if i in range(0,4):
+	    if i==0 and len(c)==4:
+	        var.person ='empty'
+	        var.trait='empty'
+	        if d==0:
+	            if var.person =='empty' and var.trait =='empty':
+	                person_choice.append(personlist_self.pop(x))
+	                var.person=person_choice[0]
+	                person_choice.clear()
+	                x=random.randint(0,3)
+	                trait = traitlist.pop(y)
+	                var.trait=trait
+	                y=random.randint(0,7)
+	                if len(traitlist)==1:
+	                    traitlist = ['gregarious','outgoing','miserable','cannot code','fancy','winner','chad','belittled','thoughtful']
+	                c.remove(0)
+	        if d==1:
+	            if var.person =='empty' and var.trait =='empty':
+	                person_choice.append(personlist_acquaintance.pop(x)) 
+	                var.person=person_choice[0]
+	                person_choice.clear()
+	                x=random.randint(0,3)
+	                trait = traitlist.pop(y)
+	                var.trait=trait
+	                y=random.randint(0,7)
+	                if len(traitlist)==1:
+	                    traitlist = ['gregarious','outgoing','miserable','cannot code','fancy','winner','chad','belittled','thoughtful']
+	                c.remove(1)
+	        if d==2:
+	            if var.person =='empty' and var.trait =='empty':
+	                person_choice.append(personlist_close.pop(x)) 
+	                var.person=person_choice[0]
+	                person_choice.clear()
+	                x=random.randint(0,3)
+	                trait = traitlist.pop(y)
+	                var.trait=trait
+	                y=random.randint(0,7)
+	                if len(traitlist)==1:
+	                    traitlist = ['gregarious','outgoing','miserable','cannot code','fancy','winner','chad','belittled','thoughtful']
+	                c.remove(2)
+	        if d==3:
+	            if var.person =='empty' and var.trait =='empty':
+	                person_choice.append(personlist_other.pop(x)) 
+	                var.person=person_choice[0]
+	                person_choice.clear()
+	                x=random.randint(0,3)
+	                trait = traitlist.pop(y)
+	                var.trait=trait
+	                y=random.randint(0,7)
+	                if len(traitlist)==1:
+	                    traitlist = ['gregarious','outgoing','miserable','cannot code','fancy','winner','chad','belittled','thoughtful']
+	                c.remove(3)
+	    
+	    d=random.choice(c) # Здесь выполняется код уже для следующей итерации, и так далее. После одного выполнения скрипта (одной итерации i) порядковый номер d следующего выбираемого списка вновь рандомизируется, количество доступных к выбору списков уменьшается на 1 == длина переменной "c" уменьшается на 1. Выбирается второе слово для показа
+	    if i==1 and len(c)==3:
+	        var.person='empty'
+	        var.trait='empty'
+	        if d==0:
+	            if var.person =='empty' and var.trait =='empty':
+	                person_choice.append(personlist_self.pop(x)) 
+	                var.person=person_choice[0]
+	                person_choice.clear()
+	                x=random.randint(0,2)
+	                trait = traitlist.pop(y)
+	                var.trait=trait
+	                y=random.randint(0,6)
+	                if len(traitlist)==1:
+	                    traitlist = ['gregarious','outgoing','miserable','cannot code','fancy','winner','chad','belittled','thoughtful']
+	                c.remove(0)
+	        if d==1:
+	            if var.person =='empty' and var.trait =='empty':
+	                person_choice.append(personlist_acquaintance.pop(x)) 
+	                var.person=person_choice[0]
+	                person_choice.clear()
+	                x=random.randint(0,2)
+	                trait = traitlist.pop(y)
+	                var.trait=trait
+	                y=random.randint(0,6)
+	                if len(traitlist)==1:
+	                    traitlist = ['gregarious','outgoing','miserable','cannot code','fancy','winner','chad','belittled','thoughtful']
+	                c.remove(1)
+	        if d==2:
+	            if var.person =='empty' and var.trait =='empty':
+	                person_choice.append(personlist_close.pop(x)) 
+	                var.person=person_choice[0]
+	                person_choice.clear()
+	                x=random.randint(0,2)
+	                trait = traitlist.pop(y)
+	                var.trait=trait
+	                y=random.randint(0,6)
+	                if len(traitlist)==1:
+	                    traitlist = ['gregarious','outgoing','miserable','cannot code','fancy','winner','chad','belittled','thoughtful']
+	                c.remove(2)
+	        if d==3:
+	            if var.person =='empty' and var.trait =='empty':
+	                person_choice.append(personlist_other.pop(x)) 
+	                var.person=person_choice[0]
+	                person_choice.clear()
+	                x=random.randint(0,2)
+	                trait = traitlist.pop(y)
+	                var.trait=trait
+	                y=random.randint(0,6)
+	                if len(traitlist)==1:
+	                    traitlist = ['gregarious','outgoing','miserable','cannot code','fancy','winner','chad','belittled','thoughtful']
+	                c.remove(3)
+	    
+	    d=random.choice(c) # количество доступных списков 2, выбор и показ третьего слова
+	    if i==2 and len(c)==2:
+	        var.person='empty'
+	        var.trait='empty'
+	        if d==0:
+	            if var.person =='empty' and var.trait =='empty':
+	                person_choice.append(personlist_self.pop(x)) 
+	                var.person=person_choice[0]
+	                person_choice.clear()
+	                x=random.randint(0,1)
+	                trait = traitlist.pop(y)
+	                var.trait=trait
+	                y=random.randint(0,5)
+	                if len(traitlist)==1:
+	                    traitlist = ['gregarious','outgoing','miserable','cannot code','fancy','winner','chad','belittled','thoughtful']
+	                c.remove(0)
+	        if d==1:
+	            if var.person =='empty' and var.trait =='empty':
+	                person_choice.append(personlist_acquaintance.pop(x)) 
+	                var.person=person_choice[0]
+	                person_choice.clear()
+	                x=random.randint(0,1)
+	                trait = traitlist.pop(y)
+	                var.trait=trait
+	                y=random.randint(0,5)
+	                if len(traitlist)==1:
+	                    traitlist = ['gregarious','outgoing','miserable','cannot code','fancy','winner','chad','belittled','thoughtful']
+	                c.remove(1)
+	        if d==2:
+	            if var.person =='empty' and var.trait =='empty':
+	                person_choice.append(personlist_close.pop(x)) 
+	                var.person=person_choice[0]
+	                person_choice.clear()
+	                x=random.randint(0,1)
+	                trait = traitlist.pop(y)
+	                var.trait=trait
+	                y=random.randint(0,5)
+	                if len(traitlist)==1:
+	                    traitlist = ['gregarious','outgoing','miserable','cannot code','fancy','winner','chad','belittled','thoughtful']
+	                c.remove(2)
+	        if d==3:
+	            if var.person =='empty' and var.trait =='empty':
+	                person_choice.append(personlist_other.pop(x)) 
+	                var.person=person_choice[0]
+	                person_choice.clear()
+	                x=random.randint(0,1)
+	                trait = traitlist.pop(y)
+	                var.trait=trait
+	                y=random.randint(0,5)
+	                if len(traitlist)==1:
+	                    traitlist = ['gregarious','outgoing','miserable','cannot code','fancy','winner','chad','belittled','thoughtful']
+	                c.remove(3)
+	                
+	    
+	    d=random.choice(c)    # количество доступных списков 1, выбор и показ четвертого слова
+	    if i==3 and len(c)==1:
+	        var.person='empty'
+	        var.trait='empty'
+	        if d==0:
+	            if var.person =='empty' and var.trait =='empty':
+	                person_choice.append(personlist_self.pop(x)) 
+	                var.person=person_choice[0]
+	                person_choice.clear()
+	                x=0
+	                trait = traitlist.pop(y)
+	                var.trait=trait
+	                y=random.randint(0,4)
+	                if len(traitlist)==1:
+	                    traitlist = ['gregarious','outgoing','miserable','cannot code','fancy','winner','chad','belittled','thoughtful']
+	                d=c.pop(0)    # значение d принимает последний оставшийся порядковый номер "с", чтобы показать пятое слово в следующей итерации
+	        if d==1:
+	            if var.person =='empty' and var.trait =='empty':
+	                person_choice.append(personlist_acquaintance.pop(x)) 
+	                var.person=person_choice[0]
+	                person_choice.clear()
+	                x=0
+	                trait = traitlist.pop(y)
+	                var.trait=trait
+	                y=random.randint(0,4)
+	                if len(traitlist)==1:
+	                    traitlist = ['gregarious','outgoing','miserable','cannot code','fancy','winner','chad','belittled','thoughtful']
+	                d=c.pop(0)
+	        if d==2:
+	            if var.person =='empty' and var.trait =='empty':
+	                person_choice.append(personlist_close.pop(x)) 
+	                var.person=person_choice[0]
+	                person_choice.clear()
+	                x=0
+	                trait = traitlist.pop(y)
+	                var.trait=trait
+	                y=random.randint(0,4)
+	                if len(traitlist)==1:
+	                    traitlist = ['gregarious','outgoing','miserable','cannot code','fancy','winner','chad','belittled','thoughtful']
+	                d=c.pop(0)
+	        if d==3:
+	            if var.person =='empty' and var.trait =='empty':
+	                person_choice.append(personlist_other.pop(x)) 
+	                var.person=person_choice[0]
+	                person_choice.clear()
+	                x=0
+	                trait = traitlist.pop(y)
+	                var.trait=trait
+	                y=random.randint(0,4)
+	                if len(traitlist)==1:
+	                    traitlist = ['gregarious','outgoing','miserable','cannot code','fancy','winner','chad','belittled','thoughtful']
+	                d=c.pop(0)
+	                
+	    if i==4 and len(c)==0: # d не рандомизируется, так как рандомизировать больше нечего, последний порядковый номер уже был записан в эту переменную из "с" на предыдущем этапе и эта переменная пуста. происходит выбор и показ пятого слова
+	        var.person='empty'
+	        var.trait='empty'
+	        if d==0:
+	            if var.person =='empty' and var.trait =='empty':
+	                person_choice.append(personlist_self.pop(x)) 
+	                var.person=person_choice[0]
+	                person_choice.clear()
+	                x=0
+	                trait = traitlist.pop(y)
+	                var.trait=trait
+	                y=random.randint(0,4)
+	                if len(traitlist)==1:
+	                    traitlist = ['gregarious','outgoing','miserable','cannot code','fancy','winner','chad','belittled','thoughtful']
+	        if d==1:
+	            if var.person =='empty' and var.trait =='empty':
+	                person_choice.append(personlist_acquaintance.pop(x)) 
+	                var.person=person_choice[0]
+	                person_choice.clear()
+	                x=0
+	                trait = traitlist.pop(y)
+	                var.trait=trait
+	                y=random.randint(0,4)
+	                if len(traitlist)==1:
+	                    traitlist = ['gregarious','outgoing','miserable','cannot code','fancy','winner','chad','belittled','thoughtful']
+	        if d==2:
+	            if var.person =='empty' and var.trait =='empty':
+	                person_choice.append(personlist_close.pop(x)) 
+	                var.person=person_choice[0]
+	                person_choice.clear()
+	                x=0
+	                trait = traitlist.pop(y)
+	                var.trait=trait
+	                y=random.randint(0,4)
+	                if len(traitlist)==1:
+	                    traitlist = ['gregarious','outgoing','miserable','cannot code','fancy','winner','chad','belittled','thoughtful']
+	        if d==3:
+	            if var.person =='empty' and var.trait =='empty':
+	                person_choice.append(personlist_other.pop(x))
+	                var.person=person_choice[0]
+	                person_choice.clear()
+	                x=0
+	                trait = traitlist.pop(y)
+	                var.trait=trait
+	                y=random.randint(0,4)
+	                if len(traitlist)==1:
+	                    traitlist = ['gregarious','outgoing','miserable','cannot code','fancy','winner','chad','belittled','thoughtful']
+	
+	else:
+	    var.trait=0    #OpenSesame принимает, что значения экспериментальных переменных теперь равны нулю и заново запускает основной скрипт new_1_inline_script, таким образом весь процесс начинается заново
+	    var.person=0
+	        
+	i=i+1
+	__end__
+	set _prepare ""
+
+define keyboard_response new_keyboard_response
+	set timeout 1
+	set flush yes
+	set event_type keypress
+	set duration keypress
+	set description "Собирает ответы с клавиатуры"
+	set allowed_responses "1;2;3;4"
+
+define logger new_logger
+	set description "Журнал экспериментальных данных"
+	set auto_log yes
+
+define loop new_loop
+	set source table
+	set repeat 100
+	set order sequential
+	set description "Повторно запускает другой элемент"
+	set cycles 4
+	set continuous no
+	set break_if_on_first yes
+	set break_if False
+	setcycle 0 person "[person]"
+	setcycle 0 trait "[trait]"
+	setcycle 1 person "[person]"
+	setcycle 1 trait "[trait]"
+	setcycle 2 person "[person]"
+	setcycle 2 trait "[trait]"
+	setcycle 3 person "[person]"
+	setcycle 3 trait "[trait]"
+	run new_sequence
+
+define repeat_cycle new_repeat_cycle
+	set description "Optionally repeat a cycle from a loop"
+	set condition never
+
+define sequence new_sequence
+	set flush_keyboard yes
+	set description "Запускает несколько элементов в последовательности"
+	run new_sketchpad True
+	run new_1_sketchpad True
+	run new_keyboard_response True
+	run new_logger True
+	run new_inline_script True
+	run new_1_inline_script "var.trait == 0 and var.person == 0"
+
+define sketchpad new_sketchpad
+	set duration 2000
+	set description "Отображает стимулы"
+	draw line color=white penwidth=9 show_if=True x1=0 x2=0 y1=-32 y2=32 z_index=0
+	draw line color=white penwidth=9 show_if=True x1=-32 x2=32 y1=0 y2=0 z_index=0
+	draw textline center=1 color=white font_bold=no font_family=mono font_italic=no font_size=50 html=yes show_if=True text="[person]" x=0 y=-256 z_index=0
+	draw textline center=1 color=white font_bold=no font_family=mono font_italic=no font_size=50 html=yes show_if=True text="[trait]" x=0 y=288 z_index=0
+
+define sketchpad welcome
+	set start_response_interval no
+	set reset_variables no
+	set duration keypress
+	set description "Отображает стимулы"
+	draw textline center=1 color=white font_bold=no font_family=serif font_italic=no font_size=32 html=yes show_if=True text="OpenSesame 4.0 <i>Melodramatic Milgram</i>" x=0 y=0 z_index=0
+
